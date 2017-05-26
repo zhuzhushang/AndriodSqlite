@@ -43,7 +43,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     public void onBindViewHolder(RecyclerAdapter.ViewHolder holder, int position) {
 
         PersonModel model = list.get(position);
-        holder.name.setText("名字：" + model.getName() + " " + model.getId());
+        holder.name.setText("名字：" + model.getName() + "  " + model.getId());
         holder.address.setText("地址：" + model.getAddress());
         if (model.getIsBoy() == 1) {
             holder.sex.setText("性别：男");

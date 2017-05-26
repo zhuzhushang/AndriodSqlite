@@ -131,7 +131,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             case R.id.add:
 
-                addData();
+                addDataReturnID();
+//                addData();
 //                addDataSql();
 
                 break;
@@ -185,6 +186,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+    /**
+     * 添加数据
+     */
     private void addData() {
 
         PersonModel model = new PersonModel();
@@ -197,6 +201,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         boolean isSucc = mySqliteHelper.addPersonData(model);
 
         if (isSucc) {
+
+            ToastUtils.show(context, "添加数据成功");
+            mList.add(0, model);
+            mAdapter.notifyDataSetChanged();
+        } else {
+            ToastUtils.show(context, "添加失败");
+        }
+    }
+
+    /**
+     * 添加数据返回id
+     */
+    private void addDataReturnID() {
+
+        PersonModel model = new PersonModel();
+        model.setAddress(addressArray[mRandom.nextInt(addressArray.length)]);
+        model.setName(nameArray[mRandom.nextInt(nameArray.length)]);
+        model.setAge(mRandom.nextInt(101));
+        model.setIsBoy(isBoyArray[mRandom.nextInt(isBoyArray.length)]);
+        model.setPic(picArray[mRandom.nextInt(picArray.length)]);
+
+        model = mySqliteHelper.addPersonDataReturnID(model);
+
+        if (model != null) {
 
             ToastUtils.show(context, "添加数据成功");
             mList.add(0, model);

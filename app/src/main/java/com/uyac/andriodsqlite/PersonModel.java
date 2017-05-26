@@ -6,7 +6,7 @@ package com.uyac.andriodsqlite;
 
 public class PersonModel {
 
-    private int id;
+    private long id;
     private String name;
     /*1代表是男孩*/
     private int isBoy;
@@ -23,11 +23,11 @@ public class PersonModel {
         this.age = age;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 
