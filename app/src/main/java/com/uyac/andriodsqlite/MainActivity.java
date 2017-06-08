@@ -24,10 +24,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private RecyclerView recyclerview;
     private List<PersonModel> mList;
     private RecyclerAdapter mAdapter;
-    private Button add, delete, update, query;
+    private Button add, delete, modify, query,update;
     private MySqliteHelper mySqliteHelper;
 
     private Random mRandom;
+    //名字数组，用于添加数据时随机
     private String nameArray[] = {"大一", "小二", "张三", "李四", "王五", "马六", "胡七", "王八", "金九", "银十", "天地", "玄黄", "宇宙", "洪荒", "嘻嘻", "欣欣向荣", "小明", "小红帽", "五天", "陈奕迅"};
     private String addressArray[] = {"北京市东花市北里20号楼6单元501室",
             "虹口区西康南路125弄34号201室 ",
@@ -46,6 +47,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private int isBoyArray[] = {1, 1, 0, 1, 0, 10, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 01, 0, 1, 0, 0, 0, 0,};
     private int imgArray[] = {R.mipmap.ic_launcher, R.mipmap.pic_1, R.mipmap.pic_2, R.mipmap.pic_3, R.mipmap.pic_4, R.mipmap.pic_5, R.mipmap.pic_6, R.mipmap.pic_7, R.mipmap.pic_8, R.mipmap.pic_9, R.mipmap.pic_10, R.mipmap.pic_11, R.mipmap.pic_12, R.mipmap.pic_spc};
     private byte picArray[][];
+
+    //用于更新的版本号
+    private int currentVersion;
+
 
 
     @Override
@@ -69,8 +74,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         recyclerview = (RecyclerView) findViewById(R.id.recyclerview);
         add = (Button) findViewById(R.id.add);
         delete = (Button) findViewById(R.id.delete);
-        update = (Button) findViewById(R.id.update);
+        modify = (Button) findViewById(R.id.modify);
         query = (Button) findViewById(R.id.query);
+        update = (Button) findViewById(R.id.update);
     }
 
     private void dataInit() {
@@ -78,6 +84,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         mRandom = new Random();
         mySqliteHelper = new MySqliteHelper(context, Constants.DB_NAME, null, Constants.DB_VERSION);
+        currentVersion = Constants.DB_VERSION;
         mList = new ArrayList<>();
         mAdapter = new RecyclerAdapter(context, mList);
         recyclerview.setAdapter(mAdapter);
@@ -86,15 +93,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //加载图片
         loadImg();
 
-
     }
 
     private void eventInit() {
         // TODO Auto-generated method stub
         add.setOnClickListener(this);
         delete.setOnClickListener(this);
-        update.setOnClickListener(this);
+        modify.setOnClickListener(this);
         query.setOnClickListener(this);
+        update.setOnClickListener(this);
 
     }
 
@@ -114,13 +121,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         for (int i = 0; i < imgArray.length; i++) {
 
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            InputStream is = context.getResources().openRawResource(imgArray[i]);
-            Bitmap bitmap = BitmapFactory.decodeStream(is);
-            bitmap.compress(Bitmap.CompressFormat.PNG, 90, baos);
-
-            picArray[i] = baos.toByteArray();
+            picArray[i] = picTobyte(imgArray[i]);
         }
+    }
+
+
+    /**
+     * @param resourceID  图片资源id
+     * @return   将图片转化成byte
+     */
+    private byte[] picTobyte(int resourceID)
+    {
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        InputStream is = context.getResources().openRawResource(resourceID);
+        Bitmap bitmap = BitmapFactory.decodeStream(is);
+        //压缩图片，100代表不压缩（0～100）
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+
+        return baos.toByteArray();
     }
 
 
@@ -152,7 +171,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
                 break;
-            case R.id.update:
+            case R.id.modify:
 
                 if (mList == null || mList.size() == 0) {
                     ToastUtils.show(context, "请先添加数据");
@@ -178,7 +197,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 mList.clear();
                 mList.addAll(mySqliteHelper.queryAllPersonDataOrderBy());
+//                mList.addAll(mySqliteHelper.rawQueryAllPersonData());
                 mAdapter.notifyDataSetChanged();
+
+                break;
+            case R.id.update:
+
+                //增加版本号来更新数据库
+//                mySqliteHelper = new MySqliteHelper(context, Constants.DB_NAME, null, ++currentVersion);
+//                Log.e(TAG, " currentVersion = "+currentVersion );
 
                 break;
         }
@@ -234,6 +261,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    /**
+     * 用sql语句添加数据
+     */
     private void addDataSql() {
 
         PersonModel model = new PersonModel();
@@ -248,6 +278,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mAdapter.notifyDataSetChanged();
     }
 
+    /**
+     * @return 生成一个随机的PersonModel
+     */
     private PersonModel getPersonModel() {
         PersonModel model = new PersonModel();
         model.setAddress(addressArray[mRandom.nextInt(addressArray.length)]);
@@ -257,6 +290,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         model.setPic(picArray[mRandom.nextInt(picArray.length)]);
 
         return model;
+
+
 
     }
 

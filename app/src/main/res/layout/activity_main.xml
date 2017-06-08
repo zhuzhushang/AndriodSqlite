@@ -41,7 +41,7 @@
             />
 
         <Button
-            android:id="@+id/update"
+            android:id="@+id/modify"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -56,6 +56,16 @@
             android:layout_weight="1"
             android:layout_margin="5dp"
             android:text="查id↑↓"
+            />
+
+        <Button
+            android:id="@+id/update"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:visibility="gone"
+            android:layout_margin="5dp"
+            android:text="更新"
             />
 
 

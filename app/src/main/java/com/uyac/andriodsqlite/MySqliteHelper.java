@@ -88,6 +88,7 @@ public class MySqliteHelper extends SQLiteOpenHelper {
     }
 
     /**
+     * 添加数据
      * @param model 数据模型
      * @return 返回添加数据有木有成功
      */
@@ -98,6 +99,7 @@ public class MySqliteHelper extends SQLiteOpenHelper {
         values.put(VALUE_AGE, model.getAge());
         values.put(VALUE_ISBOY, model.getIsBoy());
         values.put(VALUE_ADDRESS, model.getAddress());
+        //这里存储图片，model.getPic() 是一个字节数组
         values.put(VALUE_PIC, model.getPic());
 
         //添加数据到数据库
@@ -356,7 +358,7 @@ public class MySqliteHelper extends SQLiteOpenHelper {
     }
 
     /**
-     * 查询全部数据
+     * 查询全部数据,按id降序或者升序排列。
      */
     public List<PersonModel> queryAllPersonDataOrderBy() {
 
@@ -398,34 +400,113 @@ public class MySqliteHelper extends SQLiteOpenHelper {
 
 
     /**
+     * query()方法查询
      * 一些查询用法
      */
-    public void queryPersonData() {
+    public Cursor queryPersonData() {
 
+        Cursor cursor = null;
 
         //查询全部数据
-        getWritableDatabase().query(TABLE_NAME_PERSON, null, null, null, null, null, null);
+        cursor = getWritableDatabase().query(TABLE_NAME_PERSON, null, null, null, null, null, null);
         //查询 _id = 1 的数据
-        getWritableDatabase().query(TABLE_NAME_PERSON, null, VALUE_ID + "=?", new String[]{"1"}, null, null, null);
+        cursor = getWritableDatabase().query(TABLE_NAME_PERSON, null, VALUE_ID + "=?", new String[]{"1"}, null, null, null);
         //查询 name = 张三 并且 age > 23 的数据
-        getWritableDatabase().query(TABLE_NAME_PERSON, null, VALUE_NAME + "=?" + " and " + VALUE_AGE + ">?", new String[]{"张三", "23"}, null, null, null);
+        cursor = getWritableDatabase().query(TABLE_NAME_PERSON, null, VALUE_NAME + "=?" + " and " + VALUE_AGE + ">?", new String[]{"张三", "23"}, null, null, null);
         //查询 name = 张三 并且 age > 23 的数据  并按照id 降序排列
-        getWritableDatabase().query(TABLE_NAME_PERSON, null, VALUE_NAME + "=?" + " and " + VALUE_AGE + ">?", new String[]{"张三", "23"}, null, null, VALUE_ID + " desc");
+        cursor = getWritableDatabase().query(TABLE_NAME_PERSON, null, VALUE_NAME + "=?" + " and " + VALUE_AGE + ">?", new String[]{"张三", "23"}, null, null, VALUE_ID + " desc");
         //查询数据按_id降序排列 并且只取前4条。
-        getWritableDatabase().query(TABLE_NAME_PERSON, null, null, null, null, null, VALUE_ID + " desc", "0,4");
+        cursor = getWritableDatabase().query(TABLE_NAME_PERSON, null, null, null, null, null, VALUE_ID + " desc", "0,4");
 
+        return cursor;
     }
 
 
     /**
+     * rawQuery()方法查询
+     *
      * 一些查询用法
+     *
+     * 容易出错，万千注意。
+     *
+     * 注意空格、单引号、单词不要写错了。
+     *
      */
-    public void queryPersonDataRaw() {
+    public Cursor rawQueryPersonData() {
 
+        Cursor cursor = null;
+        String rawQuerySql = null;
 
         //查询全部数据
+        rawQuerySql =  "select * from "+TABLE_NAME_PERSON;
+        //查询_id = 1 的数据  select * from person where _id = 1
+        rawQuerySql = "select * from "+TABLE_NAME_PERSON+" where "+VALUE_ID +" = 1";
 
+        //查询 name = 张三 并且 age > 23 的数据  通配符？ select * from person where name = ? and age > ?
+        rawQuerySql = "select * from "+TABLE_NAME_PERSON+" where "+VALUE_NAME +" = ?"+" and "+ VALUE_AGE +" > ?";
+//        cursor = getWritableDatabase().rawQuery(rawQuerySql,new String[]{"张三","23"});
 
+        //查询 name = 张三 并且 age >= 23 的数据  select * from person where name = '张三' and age >= '23'
+        rawQuerySql = "select * from "+TABLE_NAME_PERSON+" where "+VALUE_NAME +" = '张三'"+" and "+ VALUE_AGE +" >= '23'";
+
+        //查询 name = 张三 并且 age >= 23 的数据  并按照id 降序排列  select * from person where name = '张三' and age >= '23' order by _id desc
+        rawQuerySql = "select * from "+TABLE_NAME_PERSON+" where "+VALUE_NAME +" = '张三'"+" and "+ VALUE_AGE +" >= '23'"+" order by "+VALUE_ID +" desc";
+
+        //查询数据按_id降序排列 并且只取前4条。(测试下标是从0开始)  select * from person order by _id desc limit 0, 4
+        rawQuerySql = "select * from "+TABLE_NAME_PERSON+" order by "+VALUE_ID +" desc"+" limit 0, 4";
+
+        //查询年龄在20岁以上或者是女生 的数据 select age,isboy from person where age > 20 or isboy != 1
+        rawQuerySql = "select "+VALUE_AGE+","+VALUE_ISBOY +" from " +TABLE_NAME_PERSON+" where "+VALUE_AGE+" > 20"+" or "+VALUE_ISBOY +" != 1";
+
+        //查询年龄小于等于20 或者 大于等于 80的数据 并且按年龄升序排列 select * from person where age <= 20 or age >=80 order by age asc
+        rawQuerySql = "select * from "+TABLE_NAME_PERSON+" where "+VALUE_AGE+" <= 20"+" or "+VALUE_AGE+" >=80"+" order by "+VALUE_AGE+" asc";
+
+        cursor = getWritableDatabase().rawQuery(rawQuerySql,null);
+
+        Log.e(TAG, rawQuerySql );
+
+        return cursor;
+
+    }
+
+    /**
+     * 查询全部数据
+     */
+    public List<PersonModel> rawQueryAllPersonData() {
+
+        //查询全部数据
+        Cursor cursor = rawQueryPersonData();
+        List<PersonModel> list = new ArrayList<>();
+        if (cursor != null && cursor.getCount() > 0) {
+            //移动到首位
+            cursor.moveToFirst();
+            for (int i = 0; i < cursor.getCount(); i++) {
+
+                int id = cursor.getInt(cursor.getColumnIndex(VALUE_ID));
+                String name = cursor.getString(cursor.getColumnIndex(VALUE_NAME));
+                int isBoy = cursor.getInt(cursor.getColumnIndex(VALUE_ISBOY));
+                int age = cursor.getInt(cursor.getColumnIndex(VALUE_AGE));
+                String address = cursor.getString(cursor.getColumnIndex(VALUE_ADDRESS));
+                byte pic[] = cursor.getBlob(cursor.getColumnIndex(VALUE_PIC));
+
+                PersonModel model = new PersonModel();
+                model.setId(id);
+                model.setName(name);
+                model.setIsBoy(isBoy);
+                model.setAge(age);
+                model.setAddress(address);
+                model.setPic(pic);
+
+                list.add(model);
+                //移动到下一位
+                cursor.moveToNext();
+            }
+        }
+
+        cursor.close();
+        getWritableDatabase().close();
+
+        return list;
     }
 
 }
