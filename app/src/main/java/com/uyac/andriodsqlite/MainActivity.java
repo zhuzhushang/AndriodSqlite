@@ -10,6 +10,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -44,9 +45,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             "广东省广州市越秀区中山六路",
             "上海市浦东新区x606"};
     private int ageArray[] = {464, 654, 564, 56, 456, 456, 4, 56131, 8, 1, 3, 556, 464, 611, 66, 5, 79, 9, 8, 79, 1, 100, 12, 15, 10000};
-    private int isBoyArray[] = {1, 1, 0, 1, 0, 10, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 01, 0, 1, 0, 0, 0, 0,};
+    private int isBoyArray[] = {1, 1, 0, 1, 0, 10, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0,};
     private int imgArray[] = {R.mipmap.ic_launcher, R.mipmap.pic_1, R.mipmap.pic_2, R.mipmap.pic_3, R.mipmap.pic_4, R.mipmap.pic_5, R.mipmap.pic_6, R.mipmap.pic_7, R.mipmap.pic_8, R.mipmap.pic_9, R.mipmap.pic_10, R.mipmap.pic_11, R.mipmap.pic_12, R.mipmap.pic_spc};
     private byte picArray[][];
+    //缺点
+    private String bads[] = {"懒","宅","笨","脾气暴躁"};
+    //优点
+    private String goods[] = {"爱运动","爱笑","专业能力强","无敌","善良"};
 
     //用于更新的版本号
     private int currentVersion;
@@ -64,6 +69,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         dataInit();
         eventInit();
 
+        ImageView imageView = new ImageView(this);
+        imageView.setImageBitmap(null);
+        imageView.getDrawable();
 
     }
 

@@ -20,6 +20,8 @@ public class MySqliteHelper extends SQLiteOpenHelper {
 
     /*表名*/
     private final String TABLE_NAME_PERSON = "person";
+    /*临时表面*/
+    private final String TABLE_NAME_TEMP_PERSON = "temp_person";
     /*id字段*/
     private final String VALUE_ID = "_id";
     private final String VALUE_NAME = "name";
@@ -28,6 +30,8 @@ public class MySqliteHelper extends SQLiteOpenHelper {
     private final String VALUE_ADDRESS = "address";
     /*头像字段*/
     private final String VALUE_PIC = "pic";
+    /*优点*/
+    private final String VALUE_GOODS = "goods";
 
     /*创建表语句 语句对大小写不敏感 create table 表名(字段名 类型，字段名 类型，…)*/
     private final String CREATE_PERSON = "create table " + TABLE_NAME_PERSON + "(" +
@@ -38,6 +42,35 @@ public class MySqliteHelper extends SQLiteOpenHelper {
             VALUE_ADDRESS + " text," +
             VALUE_PIC + " blob" +
             ")";
+
+
+    //=====================更新语句==========================
+    //建立新的person表(加入了新字段 VALUE_GOODS )
+    private final String CREATE_NEW_TABLE  = "create table " + TABLE_NAME_PERSON + "(" +
+    VALUE_ID + " integer primary key," +
+     VALUE_GOODS + " text ,"+
+    VALUE_NAME + " text ," +
+    VALUE_ISBOY + " integer," +
+    VALUE_AGE + " ingeter," +
+    VALUE_ADDRESS + " text," +
+    VALUE_PIC + " blob " +
+            ")";
+
+    //重命名person表为temp_person表
+    private final String CREATE_TEMP_TABLE  = "alter table "+TABLE_NAME_PERSON+" rename to "+TABLE_NAME_TEMP_PERSON;
+
+    //将temp_person表的数据导入新person表（优点是添加的默认数据）
+    private final String INSERT_DATA  = "insert into "+TABLE_NAME_PERSON +" select "+ VALUE_ID +" , "+
+            " \" 优点\" "+" , "+
+            VALUE_NAME+" , "+
+            VALUE_ISBOY+" , "+
+            VALUE_AGE+" , "+
+            VALUE_ADDRESS+" , "+
+            VALUE_PIC+" "+
+            " from "+TABLE_NAME_TEMP_PERSON;
+
+    //删除temp_person表
+    private final String DROP_TEMP_TABLE  = "drop table "+TABLE_NAME_TEMP_PERSON;
 
 
     public MySqliteHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
@@ -56,10 +89,46 @@ public class MySqliteHelper extends SQLiteOpenHelper {
     }
 
     @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+    public void onUpgrade(SQLiteDatabase db, int oldVersion,  int newVersion) {
 
-        Log.e(TAG, "-------> onUpgrade");
+        Log.e(TAG, "-------> onUpgrade"+"  oldVersion = "+oldVersion+"   newVersion = "+newVersion);
 
+        if(oldVersion != newVersion)
+        {
+            switch (newVersion)
+            {
+                case 3:
+
+                    //升级数据库，不改变表结构 注意空格
+                    //添加列 addcol_goods2 , text 为字符串数据类型 ,person为表名
+                    //alter table person add column addcol_goods2 text
+                    //添加的列 添加优点 添加缺点
+                    String addColGoods = "addcol_goods"+newVersion;
+                    String addColBads = "addcol_bads"+newVersion;
+                    //添加列的sql语句
+                    String upgradeGoods = "alter table "+TABLE_NAME_PERSON + " add column "+ addColGoods+" text";
+                    String upgradeBads = "alter table "+TABLE_NAME_PERSON+" add column "+addColBads+" text";
+                    //执行sql语句  一次只能添加一个字段
+                    db.execSQL(upgradeGoods);
+                    db.execSQL(upgradeBads);
+
+                    Log.e(TAG, ""+upgradeGoods );
+
+                    break;
+
+                case 2:
+
+                    db.execSQL(CREATE_TEMP_TABLE);
+                    db.execSQL(CREATE_NEW_TABLE);
+                    db.execSQL(INSERT_DATA);
+                    db.execSQL(DROP_TEMP_TABLE);
+
+
+
+                    break;
+
+            }
+        }
     }
 
 
