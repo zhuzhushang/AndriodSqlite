@@ -41,7 +41,7 @@
             />
 
         <Button
-            android:id="@+id/modify"
+            android:id="@+id/update"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -58,24 +58,14 @@
             android:text="查id↑↓"
             />
 
-        <Button
-            android:id="@+id/update"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:visibility="gone"
-            android:layout_margin="5dp"
-            android:text="更新"
-            />
-
 
     </LinearLayout>
 
 
-    <android.support.v7.widget.RecyclerView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"></android.support.v7.widget.RecyclerView>
+        android:layout_height="wrap_content"/>
 
 
 </LinearLayout>
